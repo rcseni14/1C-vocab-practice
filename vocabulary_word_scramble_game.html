@@ -1,0 +1,578 @@
+<!DOCTYPE html>
+<html lang="en" class="h-full">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Word Scramble Adventure - English / Hungarian Vocabulary</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts: Inter & Fredoka for playful education feel -->
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- FontAwesome for Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        display: ['Fredoka', 'sans-serif'],
+                    },
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        h1, h2, h3, .font-display {
+            font-family: 'Fredoka', sans-serif;
+        }
+        /* Custom animations for success/error */
+        @keyframes bounce-short {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-8px); }
+        }
+        .animate-bounce-short {
+            animation: bounce-short 0.3s ease-in-out;
+        }
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            20%, 60% { transform: translateX(-6px); }
+            40%, 80% { transform: translateX(6px); }
+        }
+        .animate-shake {
+            animation: shake 0.4s ease-in-out;
+        }
+    </style>
+</head>
+<body class="bg-gradient-to-br from-indigo-50 via-purple-50 to-pink-50 min-h-full flex flex-col text-slate-800">
+
+    <!-- Header Navbar -->
+    <header class="bg-white/80 backdrop-blur-md border-b border-indigo-100 sticky top-0 z-30 shadow-sm">
+        <div class="max-w-4xl mx-auto px-4 py-3 flex items-center justify-between">
+            <div class="flex items-center space-x-3">
+                <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-indigo-500 to-pink-500 flex items-center justify-center text-white shadow-md">
+                    <i class="fa-solid fa-puzzle-piece text-xl"></i>
+                </div>
+                <div>
+                    <h1 class="text-xl font-bold bg-gradient-to-r from-indigo-600 to-pink-600 bg-clip-text text-transparent">Word Scramble</h1>
+                    <p class="text-xs text-slate-500">English ↔ Hungarian Vocabulary Practice</p>
+                </div>
+            </div>
+            <div class="flex items-center space-x-3">
+                <button id="btn-sound" onclick="toggleSound()" class="w-10 h-10 rounded-full bg-slate-100 hover:bg-slate-200 flex items-center justify-center text-slate-600 transition" title="Toggle Sound">
+                    <i id="sound-icon" class="fa-solid fa-volume-high"></i>
+                </button>
+                <button onclick="openWordListModal()" class="px-3 py-1.5 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 font-medium text-sm rounded-xl transition flex items-center space-x-1.5">
+                    <i class="fa-solid fa-list-ul"></i>
+                    <span class="hidden sm:inline">Word List (22)</span>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Container -->
+    <main class="flex-grow flex items-center justify-center p-4">
+        <div class="w-full max-w-xl">
+
+            <!-- START SCREEN -->
+            <div id="screen-start" class="bg-white/90 backdrop-blur-xl rounded-3xl p-8 shadow-xl border border-indigo-100 text-center">
+                <div class="w-20 h-20 bg-indigo-100 text-indigo-600 rounded-3xl mx-auto flex items-center justify-center text-4xl mb-6 shadow-inner">
+                    <i class="fa-solid fa-graduation-cap"></i>
+                </div>
+                <h2 class="text-3xl font-bold text-slate-900 mb-3">Ready to Practice?</h2>
+                <p class="text-slate-600 mb-8 max-w-md mx-auto">Unscramble the letters to form correct English words based on the Hungarian hints. Test your skills across 22 essential vocabulary words!</p>
+                
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-8">
+                    <button onclick="startGame('all')" class="p-5 rounded-2xl bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-700 hover:to-violet-700 text-white font-bold shadow-lg shadow-indigo-200 transition transform hover:-translate-y-0.5 flex flex-col items-center justify-center group">
+                        <i class="fa-solid fa-play text-2xl mb-2 group-hover:scale-110 transition"></i>
+                        <span class="text-lg">All 22 Words</span>
+                        <span class="text-xs font-normal opacity-80 mt-1">Full Practice Session</span>
+                    </button>
+                    <button onclick="startGame('random10')" class="p-5 rounded-2xl bg-gradient-to-r from-pink-500 to-rose-500 hover:from-pink-600 hover:to-rose-600 text-white font-bold shadow-lg shadow-pink-200 transition transform hover:-translate-y-0.5 flex flex-col items-center justify-center group">
+                        <i class="fa-solid fa-bolt text-2xl mb-2 group-hover:scale-110 transition"></i>
+                        <span class="text-lg">Quick 10 Quiz</span>
+                        <span class="text-xs font-normal opacity-80 mt-1">Random 10 Words</span>
+                    </button>
+                </div>
+                
+                <div class="text-xs text-slate-400">
+                    <i class="fa-solid fa-circle-info mr-1"></i> Tip: Click letter tiles to build words, or click placed tiles to undo.
+                </div>
+            </div>
+
+            <!-- GAMEPLAY SCREEN -->
+            <div id="screen-game" class="hidden bg-white/90 backdrop-blur-xl rounded-3xl p-6 sm:p-8 shadow-xl border border-indigo-100">
+                <!-- Top HUD -->
+                <div class="flex items-center justify-between mb-6 pb-4 border-b border-slate-100">
+                    <div class="flex items-center space-x-2">
+                        <span class="text-xs font-semibold uppercase tracking-wider text-slate-400">Progress</span>
+                        <span id="progress-text" class="text-sm font-bold text-indigo-600 bg-indigo-50 px-2.5 py-1 rounded-lg">1 / 22</span>
+                    </div>
+                    <div class="flex items-center space-x-4">
+                        <div class="flex items-center space-x-1.5 text-amber-500 font-bold bg-amber-50 px-3 py-1 rounded-xl text-sm">
+                            <i class="fa-solid fa-fire text-amber-500"></i>
+                            <span id="streak-count">0</span>
+                        </div>
+                        <div class="flex items-center space-x-1.5 text-emerald-600 font-bold bg-emerald-50 px-3 py-1 rounded-xl text-sm">
+                            <i class="fa-solid fa-star text-emerald-500"></i>
+                            <span id="score-count">0</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Hint / Hungarian Meaning -->
+                <div class="text-center mb-8">
+                    <span class="inline-block text-xs uppercase tracking-widest font-bold text-indigo-500 bg-indigo-50 px-3 py-1 rounded-full mb-2">Hungarian Hint</span>
+                    <h3 id="word-hint" class="text-3xl sm:text-4xl font-bold text-slate-800 capitalize">Fotel</h3>
+                </div>
+
+                <!-- Answer Slot Area -->
+                <div class="mb-8">
+                    <div class="text-xs uppercase font-semibold text-slate-400 mb-2 text-center">Your Answer</div>
+                    <div id="answer-slots" class="min-h-[72px] bg-slate-50 border-2 border-dashed border-slate-200 rounded-2xl p-3 flex flex-wrap items-center justify-center gap-2 transition">
+                        <!-- Placed Letter Tiles go here -->
+                    </div>
+                </div>
+
+                <!-- Available Letter Pool -->
+                <div class="mb-8">
+                    <div class="text-xs uppercase font-semibold text-slate-400 mb-2 text-center">Available Letters (Click to place)</div>
+                    <div id="letter-pool" class="min-h-[72px] bg-indigo-50/50 border border-indigo-100 rounded-2xl p-3 flex flex-wrap items-center justify-center gap-2">
+                        <!-- Scrambled Letter Tiles with fixed slots go here -->
+                    </div>
+                </div>
+
+                <!-- Action Buttons -->
+                <div class="flex items-center justify-between gap-3 pt-2">
+                    <button onclick="clearAnswer()" class="px-4 py-2.5 rounded-xl border border-slate-200 hover:bg-slate-50 text-slate-600 font-semibold text-sm transition flex items-center space-x-2">
+                        <i class="fa-solid fa-rotate-left"></i>
+                        <span>Reset</span>
+                    </button>
+                    <div class="flex items-center space-x-2">
+                        <button onclick="useHint()" id="btn-hint" class="px-4 py-2.5 rounded-xl bg-amber-50 hover:bg-amber-100 text-amber-700 font-semibold text-sm transition flex items-center space-x-2" title="Reveal first letter">
+                            <i class="fa-solid fa-lightbulb"></i>
+                            <span>Hint</span>
+                        </button>
+                        <button onclick="checkAnswer()" class="px-6 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-semibold text-sm shadow-md shadow-indigo-200 transition flex items-center space-x-2">
+                            <span>Check</span>
+                            <i class="fa-solid fa-arrow-right"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- SUMMARY SCREEN -->
+            <div id="screen-summary" class="hidden bg-white/90 backdrop-blur-xl rounded-3xl p-8 shadow-xl border border-indigo-100 text-center">
+                <div class="w-20 h-20 bg-emerald-100 text-emerald-600 rounded-3xl mx-auto flex items-center justify-center text-4xl mb-6 shadow-inner">
+                    <i class="fa-solid fa-trophy"></i>
+                </div>
+                <h2 class="text-3xl font-bold text-slate-900 mb-2">Great Job!</h2>
+                <p class="text-slate-600 mb-6">You completed the vocabulary practice session.</p>
+                
+                <div class="bg-slate-50 rounded-2xl p-6 mb-8 max-w-xs mx-auto border border-slate-100">
+                    <div class="text-sm text-slate-500 mb-1">Final Score</div>
+                    <div id="final-score" class="text-4xl font-black text-indigo-600 mb-4">0 / 0</div>
+                    <div class="grid grid-cols-2 gap-4 pt-4 border-t border-slate-200 text-left">
+                        <div>
+                            <div class="text-xs text-slate-400">Max Streak</div>
+                            <div id="final-streak" class="text-lg font-bold text-slate-800">0</div>
+                        </div>
+                        <div>
+                            <div class="text-xs text-slate-400">Accuracy</div>
+                            <div id="final-accuracy" class="text-lg font-bold text-slate-800">0%</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="flex flex-col sm:flex-row gap-3 justify-center">
+                    <button onclick="returnToMenu()" class="px-6 py-3 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold transition">
+                        <i class="fa-solid fa-house mr-2"></i> Main Menu
+                    </button>
+                    <button onclick="restartGame()" class="px-6 py-3 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-semibold shadow-md shadow-indigo-200 transition">
+                        <i class="fa-solid fa-rotate-right mr-2"></i> Play Again
+                    </button>
+                </div>
+            </div>
+
+        </div>
+    </main>
+
+    <!-- WORD LIST MODAL -->
+    <div id="modal-wordlist" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+        <div class="bg-white rounded-3xl max-w-lg w-full max-h-[85vh] flex flex-col shadow-2xl overflow-hidden border border-slate-100">
+            <div class="px-6 py-4 border-b border-slate-100 flex items-center justify-between bg-slate-50/50">
+                <div class="flex items-center space-x-2">
+                    <i class="fa-solid fa-book text-indigo-600"></i>
+                    <h3 class="font-bold text-lg text-slate-800">Vocabulary Word List</h3>
+                </div>
+                <button onclick="closeWordListModal()" class="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 flex items-center justify-center text-slate-500 transition">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+            <div id="modal-wordlist-content" class="p-6 overflow-y-auto divide-y divide-slate-100">
+                <!-- Word list items injected via JS -->
+            </div>
+            <div class="px-6 py-3 bg-slate-50 border-t border-slate-100 text-right">
+                <button onclick="closeWordListModal()" class="px-4 py-2 bg-indigo-600 text-white font-semibold text-sm rounded-xl hover:bg-indigo-700 transition">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- FEEDBACK TOAST / MESSAGE BOX -->
+    <div id="toast-message" class="fixed bottom-6 left-1/2 transform -translate-x-1/2 px-6 py-3 rounded-2xl shadow-xl text-white font-semibold text-sm transition-all duration-300 opacity-0 pointer-events-none z-50 flex items-center space-x-2">
+        <i id="toast-icon" class="fa-solid fa-circle-check text-lg"></i>
+        <span id="toast-text">Correct!</span>
+    </div>
+
+    <!-- Footer -->
+    <footer class="py-4 text-center text-xs text-slate-400">
+        Interactive English Vocabulary Practice • Built for Students
+    </footer>
+
+    <!-- JavaScript Game Logic -->
+    <script>
+        // Complete Vocabulary List (22 words)
+        const vocabulary = [
+            { en: "armchair", hu: "fotel" },
+            { en: "bookcase", hu: "könyvesszekrény" },
+            { en: "carpet", hu: "szőnyeg" },
+            { en: "clothes", hu: "ruha" },
+            { en: "curtain", hu: "függöny" },
+            { en: "find", hu: "(meg)talál" },
+            { en: "goldfish", hu: "aranyhal" },
+            { en: "hamster", hu: "hörcsög" },
+            { en: "lamp", hu: "lámpa" },
+            { en: "leave", hu: "hagy" },
+            { en: "messy", hu: "rendetlen" },
+            { en: "mirror", hu: "tükör" },
+            { en: "poster", hu: "poszter" },
+            { en: "share", hu: "megoszt, egy szobában lakik vkivel" },
+            { en: "shelf", hu: "polc" },
+            { en: "spend time", hu: "időt tölt" },
+            { en: "surf the Net", hu: "a Net-en böngészik" },
+            { en: "tidy", hu: "rendes, tiszta (adj.)" },
+            { en: "together", hu: "együtt" },
+            { en: "use", hu: "használ (v.)" },
+            { en: "wall", hu: "fal" },
+            { en: "wardrobe", hu: "ruhásszekrény" }
+        ];
+
+        let gameWords = [];
+        let currentIndex = 0;
+        let score = 0;
+        let streak = 0;
+        let maxStreak = 0;
+        let correctCount = 0;
+        let currentWord = null;
+        let soundEnabled = true;
+
+        let letterPoolState = []; // Array of { id, char, used: boolean }
+        let placedLetters = []; // Array of { poolId, char }
+
+        // Initialize Web Audio API synth for sound effects
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        function playTone(freq, type, duration) {
+            if (!soundEnabled) return;
+            try {
+                if (audioCtx.state === 'suspended') {
+                    audioCtx.resume();
+                }
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.type = type;
+                osc.frequency.value = freq;
+                gain.gain.setValueAtTime(0.1, audioCtx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + duration);
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+                osc.start();
+                osc.stop(audioCtx.currentTime + duration);
+            } catch (e) {
+                // Ignore audio errors if blocked
+            }
+        }
+
+        function playSuccessSound() {
+            playTone(440, 'sine', 0.1);
+            setTimeout(() => playTone(554.37, 'sine', 0.1), 100);
+            setTimeout(() => playTone(659.25, 'sine', 0.2), 200);
+        }
+
+        function playErrorSound() {
+            playTone(220, 'sawtooth', 0.15);
+            setTimeout(() => playTone(185, 'sawtooth', 0.2), 150);
+        }
+
+        function playClickSound() {
+            playTone(600, 'sine', 0.05);
+        }
+
+        function toggleSound() {
+            soundEnabled = !soundEnabled;
+            const icon = document.getElementById('sound-icon');
+            if (soundEnabled) {
+                icon.className = "fa-solid fa-volume-high";
+                showToast("Sound Enabled", "info");
+            } else {
+                icon.className = "fa-solid fa-volume-xmark";
+                showToast("Sound Muted", "info");
+            }
+        }
+
+        // Populate Word List Modal
+        function populateWordListModal() {
+            const container = document.getElementById('modal-wordlist-content');
+            container.innerHTML = "";
+            vocabulary.forEach((item, index) => {
+                const div = document.createElement('div');
+                div.className = "py-3 flex items-center justify-between text-sm";
+                div.innerHTML = `
+                    <div class="flex items-center space-x-3">
+                        <span class="w-6 h-6 rounded-full bg-indigo-50 text-indigo-600 font-bold text-xs flex items-center justify-center">${index + 1}</span>
+                        <span class="font-bold text-slate-800">${item.en}</span>
+                    </div>
+                    <span class="text-slate-500 text-right max-w-[200px] truncate">${item.hu}</span>
+                `;
+                container.appendChild(div);
+            });
+        }
+
+        function openWordListModal() {
+            populateWordListModal();
+            document.getElementById('modal-wordlist').classList.remove('hidden');
+        }
+
+        function closeWordListModal() {
+            document.getElementById('modal-wordlist').classList.add('hidden');
+        }
+
+        // Start Game Mode
+        function startGame(mode) {
+            if (mode === 'all') {
+                gameWords = [...vocabulary].sort(() => Math.random() - 0.5);
+            } else {
+                gameWords = [...vocabulary].sort(() => Math.random() - 0.5).slice(0, 10);
+            }
+            currentIndex = 0;
+            score = 0;
+            streak = 0;
+            maxStreak = 0;
+            correctCount = 0;
+
+            document.getElementById('screen-start').classList.add('hidden');
+            document.getElementById('screen-summary').classList.add('hidden');
+            document.getElementById('screen-game').classList.remove('hidden');
+
+            loadWord();
+        }
+
+        function loadWord() {
+            if (currentIndex >= gameWords.length) {
+                showSummary();
+                return;
+            }
+
+            currentWord = gameWords[currentIndex];
+            document.getElementById('progress-text').innerText = `${currentIndex + 1} / ${gameWords.length}`;
+            document.getElementById('streak-count').innerText = streak;
+            document.getElementById('score-count').innerText = score;
+            document.getElementById('word-hint').innerText = currentWord.hu;
+
+            // Prepare letters (exclude spaces for tile puzzle)
+            const cleanWord = currentWord.en.replace(/\s+/g, '');
+            const letters = cleanWord.split('');
+            
+            // Shuffle letters until scrambled or at least different if possible
+            let scrambled = [...letters];
+            if (scrambled.length > 1) {
+                let attempts = 0;
+                while (attempts < 10) {
+                    scrambled.sort(() => Math.random() - 0.5);
+                    if (scrambled.join('') !== cleanWord) break;
+                    attempts++;
+                }
+            }
+
+            letterPoolState = scrambled.map((char, idx) => ({ id: idx, char: char, used: false }));
+            placedLetters = [];
+
+            renderTiles();
+        }
+
+        function renderTiles() {
+            const poolContainer = document.getElementById('letter-pool');
+            const slotsContainer = document.getElementById('answer-slots');
+
+            poolContainer.innerHTML = "";
+            slotsContainer.innerHTML = "";
+
+            // Render available letter pool with fixed placeholder slots to prevent shifting
+            letterPoolState.forEach(item => {
+                if (item.used) {
+                    // Render an empty placeholder slot so neighboring letters stay firmly in place
+                    const placeholder = document.createElement('div');
+                    placeholder.className = "w-11 h-11 rounded-xl bg-slate-100/60 border border-slate-200/60 flex items-center justify-center opacity-40";
+                    poolContainer.appendChild(placeholder);
+                } else {
+                    // Render active letter tile
+                    const tile = document.createElement('button');
+                    tile.className = "w-11 h-11 rounded-xl bg-white border border-indigo-200 text-indigo-700 font-bold text-lg shadow-sm hover:bg-indigo-50 hover:border-indigo-300 transition transform hover:-scale-105 flex items-center justify-center uppercase";
+                    tile.innerText = item.char;
+                    tile.onclick = () => selectLetterFromPool(item.id);
+                    poolContainer.appendChild(tile);
+                }
+            });
+
+            // Render placed answer slots
+            if (placedLetters.length === 0) {
+                slotsContainer.innerHTML = `<span class="text-xs text-slate-400 italic">Click letters below to build the word</span>`;
+            } else {
+                placedLetters.forEach((item, index) => {
+                    const tile = document.createElement('button');
+                    tile.className = "w-11 h-11 rounded-xl bg-indigo-600 text-white font-bold text-lg shadow-md shadow-indigo-200 hover:bg-indigo-700 transition transform hover:-scale-105 flex items-center justify-center uppercase animate-bounce-short";
+                    tile.innerText = item.char;
+                    tile.onclick = () => returnLetterToPool(item.poolId, index);
+                    slotsContainer.appendChild(tile);
+                });
+            }
+        }
+
+        function selectLetterFromPool(id) {
+            playClickSound();
+            const poolItem = letterPoolState.find(item => item.id === id);
+            if (poolItem && !poolItem.used) {
+                poolItem.used = true;
+                placedLetters.push({ poolId: poolItem.id, char: poolItem.char });
+                renderTiles();
+            }
+        }
+
+        function returnLetterToPool(poolId, placedIndex) {
+            playClickSound();
+            // Return letter to pool
+            const poolItem = letterPoolState.find(item => item.id === poolId);
+            if (poolItem) {
+                poolItem.used = false;
+            }
+            // Remove from placed answer array
+            placedLetters.splice(placedIndex, 1);
+            renderTiles();
+        }
+
+        function clearAnswer() {
+            playClickSound();
+            // Reset all pool items to unused
+            letterPoolState.forEach(item => { item.used = false; });
+            placedLetters = [];
+            renderTiles();
+        }
+
+        function useHint() {
+            playClickSound();
+            const cleanWord = currentWord.en.replace(/\s+/g, '');
+            const targetChar = cleanWord[placedLetters.length];
+            
+            if (!targetChar) return;
+
+            // Find matching unused char in letter pool
+            const poolItem = letterPoolState.find(item => !item.used && item.char.toLowerCase() === targetChar.toLowerCase());
+            if (poolItem) {
+                poolItem.used = true;
+                placedLetters.push({ poolId: poolItem.id, char: poolItem.char });
+                renderTiles();
+                showToast("Hint used: placed next letter", "info");
+            }
+        }
+
+        function checkAnswer() {
+            const cleanWord = currentWord.en.replace(/\s+/g, '');
+            const userAttempt = placedLetters.map(item => item.char).join('').toLowerCase();
+
+            if (userAttempt.length < cleanWord.length) {
+                showToast("Not enough letters placed!", "error");
+                playErrorSound();
+                return;
+            }
+
+            if (userAttempt === cleanWord.toLowerCase()) {
+                // Correct
+                playSuccessSound();
+                score += 10 + (streak * 2);
+                streak++;
+                if (streak > maxStreak) maxStreak = streak;
+                correctCount++;
+                showToast("Correct! Excellent job!", "success");
+
+                // Advance after short delay
+                setTimeout(() => {
+                    currentIndex++;
+                    loadWord();
+                }, 800);
+            } else {
+                // Incorrect
+                playErrorSound();
+                streak = 0;
+                document.getElementById('streak-count').innerText = streak;
+                showToast("Incorrect! Try again.", "error");
+
+                // Shake animation on answer box
+                const slots = document.getElementById('answer-slots');
+                slots.classList.add('animate-shake');
+                setTimeout(() => slots.classList.remove('animate-shake'), 400);
+            }
+        }
+
+        function showToast(message, type) {
+            const toast = document.getElementById('toast-message');
+            const text = document.getElementById('toast-text');
+            const icon = document.getElementById('toast-icon');
+
+            text.innerText = message;
+            if (type === 'success') {
+                toast.className = "fixed bottom-6 left-1/2 transform -translate-x-1/2 px-6 py-3 rounded-2xl shadow-xl bg-emerald-600 text-white font-semibold text-sm transition-all duration-300 z-50 flex items-center space-x-2";
+                icon.className = "fa-solid fa-circle-check text-lg";
+            } else if (type === 'error') {
+                toast.className = "fixed bottom-6 left-1/2 transform -translate-x-1/2 px-6 py-3 rounded-2xl shadow-xl bg-rose-600 text-white font-semibold text-sm transition-all duration-300 z-50 flex items-center space-x-2";
+                icon.className = "fa-solid fa-circle-exclamation text-lg";
+            } else {
+                toast.className = "fixed bottom-6 left-1/2 transform -translate-x-1/2 px-6 py-3 rounded-2xl shadow-xl bg-indigo-600 text-white font-semibold text-sm transition-all duration-300 z-50 flex items-center space-x-2";
+                icon.className = "fa-solid fa-circle-info text-lg";
+            }
+
+            toast.style.opacity = '1';
+            setTimeout(() => {
+                toast.style.opacity = '0';
+            }, 2000);
+        }
+
+        function showSummary() {
+            document.getElementById('screen-game').classList.add('hidden');
+            document.getElementById('screen-summary').classList.remove('hidden');
+
+            const total = gameWords.length;
+            const accuracy = Math.round((correctCount / total) * 100);
+
+            document.getElementById('final-score').innerText = `${score} pts`;
+            document.getElementById('final-streak').innerText = maxStreak;
+            document.getElementById('final-accuracy').innerText = `${accuracy}%`;
+        }
+
+        function returnToMenu() {
+            document.getElementById('screen-summary').classList.add('hidden');
+            document.getElementById('screen-start').classList.remove('hidden');
+        }
+
+        function restartGame() {
+            startGame('all');
+        }
+
+        // Initialize modal content on load
+        window.onload = function() {
+            populateWordListModal();
+        }
+    </script>
+</body>
+</html>
